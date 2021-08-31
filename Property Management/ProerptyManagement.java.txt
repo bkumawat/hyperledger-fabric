@@ -1,0 +1,76 @@
+package PropertyManagement;
+
+import java.util.Objects;
+import org.hyperledger.fabric.contract.annotation.DataType;
+import org.hyperledger.fabric.contract.annotation.Property;
+import com.owlike.genson.annotation.JsonProperty;
+
+@DataType()
+public final class ProerptyManagement {
+	
+	@Property()
+	private String propertyID;
+	@Property()
+	private String propertyName;
+	@Property()
+	private String propertyAddress;
+	@Property()
+	private String propertyOwner;
+	@Property()
+	private String propertyValue;
+	
+	public String getPropertyID() {
+		return propertyID;
+	}
+	public String getPropertyName() {
+		return propertyName;
+	}
+	public String getPropertyAddress() {
+		return propertyAddress;
+	}
+	public String getPropertyOwner() {
+		return propertyOwner;
+	}
+	public String getPropertyValue() {
+		return propertyValue;
+	}
+	public ProerptyManagement(@JsonProperty("propertyID") final String propertyID,
+				@JsonProperty("propertyName") final String propertyName,
+				@JsonProperty("propertyAddress") final String propertyAddress,
+				@JsonProperty("propertyOwner") final String propertyOwner,
+				@JsonProperty("propertyValue") final String propertyValue) {
+		
+		this.propertyID = propertyID;
+		this.propertyName = propertyName;
+		this.propertyAddress = propertyAddress;
+		this.propertyOwner = propertyOwner;
+		this.propertyValue = propertyValue;
+	}
+	@Override
+	public boolean equals(final Object obj) {
+		if (this == obj) {
+			return true;
+		}
+ 
+		if ((obj == null) || (getClass() != obj.getClass())) {
+			return false;
+		}
+ 
+		ProerptyManagement other = (ProerptyManagement) obj;
+ 
+		return Objects.deepEquals(new String[] { getPropertyID(), getPropertyName(), getPropertyAddress(), getPropertyOwner(),getPropertyValue() },
+				new String[] { other.getPropertyID(), other.getPropertyName(), other.getPropertyAddress(), other.getPropertyOwner(),other.getPropertyValue() });
+	}
+ 
+	@Override
+	public int hashCode() {
+		return Objects.hash(getPropertyID(), getPropertyName(), getPropertyAddress(), getPropertyOwner(),getPropertyValue());
+	}
+ 
+	@Override
+	public String toString() {
+		return this.getClass().getSimpleName() + "@" + Integer.toHexString(hashCode()) + " [propertyID=" + propertyID + ", propertyName=" + propertyName
+				+ ", propertyAddress=" + propertyAddress + ", propertyOwner=" + propertyOwner + ",propertyValue=" + propertyValue + "]";
+	}
+ 
+}

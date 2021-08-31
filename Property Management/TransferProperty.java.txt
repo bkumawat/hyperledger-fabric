@@ -1,0 +1,80 @@
+package PropertyManagement;
+
+import org.hyperledger.fabric.contract.Context;
+import org.hyperledger.fabric.contract.ContractInterface;
+import org.hyperledger.fabric.contract.annotation.Contract;
+import org.hyperledger.fabric.contract.annotation.Info;
+import org.hyperledger.fabric.contract.annotation.Transaction;
+import org.hyperledger.fabric.shim.ChaincodeException;
+import org.hyperledger.fabric.shim.ChaincodeStub;
+
+import com.owlike.genson.Genson;
+
+@Contract (
+		name = "TransferProperty",
+		info = @Info(
+				title = "TransferProperty",
+				description = "This is property management contract to manage and transfer property",
+				version = "1.0.0-SNAPSHOT"))
+
+public final class TransferProperty implements ContractInterface{
+	private final Genson json = new Genson();
+	private enum PropertyErrors{
+		PROPERTY_NOT_FOUND,
+		PROPERTY_ALREADY_EXISTS,
+	}
+	@Transaction
+	public void initLedger(Context ctx) {
+		ChaincodeStub stub = ctx.getStub();
+		ProerptyManagement prop = new ProerptyManagement("1","Margosa Heights","NIBM Road","Bharat","1234");
+		String strProp = json.serialize(prop);
+		stub.putStringState("1", strProp);
+	}
+	@Transaction
+	public ProerptyManagement createNewProperty(Context ctx,
+			final String propID,
+			final String propName,
+			final String propAddress,
+			final String propOwner,
+			final String propValue) {
+		ChaincodeStub stub = ctx.getStub();
+		String strProp = stub.getStringState(propID);
+		if(!strProp.isEmpty()) {
+			String errorMessage = String.format("The property %s you are trying to add already exist on ledger", strProp);
+			throw new ChaincodeException(errorMessage, PropertyErrors.PROPERTY_ALREADY_EXISTS.toString());
+		}
+		ProerptyManagement propMgmt = new ProerptyManagement(propID,propName,propAddress,propOwner,propValue);
+		String strProps = json.serialize(propMgmt);
+		stub.putStringState(propID, strProps);
+		return propMgmt;
+	}
+	@Transaction
+	public ProerptyManagement queryByPropertyId(Context ctx,final String propID) {
+		ChaincodeStub stub = ctx.getStub();
+		String strObj = stub.getStringState(propID);
+		if(strObj.isEmpty()) {
+			String errorMessage = String.format("The property %s you are trying to search doesn't exists on ledger", strObj);
+			throw new ChaincodeException(errorMessage, PropertyErrors.PROPERTY_NOT_FOUND.toString());
+		}
+		ProerptyManagement propMgmt = json.deserialize(strObj, ProerptyManagement.class);
+		return propMgmt;
+	}
+	@Transaction
+	public ProerptyManagement transferProperty(Context ctx,final String propID,final String newPropOwner) {
+		ChaincodeStub stub = ctx.getStub();
+		String strObj = stub.getStringState(propID);
+		if(strObj.isEmpty()) {
+			String errorMessage = String.format("The property %s you are trying to transfer doesn't exists on ledger", strObj);
+			throw new ChaincodeException(errorMessage, PropertyErrors.PROPERTY_NOT_FOUND.toString());
+		}
+		ProerptyManagement propObject = json.deserialize(strObj, ProerptyManagement.class);
+		ProerptyManagement propMgmt = new ProerptyManagement(propObject.getPropertyID(),
+				propObject.getPropertyName(),
+				propObject.getPropertyAddress(),
+				newPropOwner,
+				propObject.getPropertyValue());
+        String newCarState = json.serialize(propMgmt);
+        stub.putStringState(propID, newCarState);
+        return propMgmt;
+	}
+}
